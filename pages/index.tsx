@@ -9,7 +9,7 @@ import apiClient from "@/utils/api";
 import { Banner, Button, Cell, Div, EllipsisText, Epic, Flex, FlexProps, Footnote, Group, Panel, PanelHeader, Placeholder, PullToRefresh, SplitCol, SplitLayout, Tabbar, TabbarItem, Title, View, useAdaptivityConditionalRender } from "@vkontakte/vkui";
 import { Icon24AddCircle, Icon28MessageOutline, Icon28NewsfeedOutline, Icon28ServicesOutline, Icon32LogoVkColor, Icon56NewsfeedOutline } from "@vkontakte/icons";
 
-import Product from "@/pages/types/products";
+import Product from "@/types/products";
 
 type APIResponse = {
   success: boolean
