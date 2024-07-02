@@ -1,13 +1,16 @@
 import useSWR from "swr";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 import Image from "next/image";
+import nextLogo from "@/public/next.svg";
 
-import { Banner, Button, Cell, Div, Epic, Flex, Footnote, Group, Panel, PanelHeader, Placeholder, PullToRefresh, SplitCol, SplitLayout, Tabbar, TabbarItem, View, useAdaptivityConditionalRender } from "@vkontakte/vkui";
+import apiClient from "@/utils/api";
+
+import { Banner, Button, Cell, Div, EllipsisText, Epic, Flex, FlexProps, Footnote, Group, Panel, PanelHeader, Placeholder, PullToRefresh, SplitCol, SplitLayout, Tabbar, TabbarItem, Title, View, useAdaptivityConditionalRender } from "@vkontakte/vkui";
 import { Icon24AddCircle, Icon28MessageOutline, Icon28NewsfeedOutline, Icon28ServicesOutline, Icon32LogoVkColor, Icon56NewsfeedOutline } from "@vkontakte/icons";
 
 import { Product } from "@/pages/types/products";
-import { Shop } from "@/pages/types/shop";
+// import { Shop } from "@/pages/types/shop";
 
 type APIResponse = {
   success: boolean
@@ -15,28 +18,36 @@ type APIResponse = {
 }
 
 const fetcher = (apiMethod: string) =>
-  fetch(`/api/${apiMethod}`, {
-    method: "GET"
-  })
-    .then((res) => res.json())
-    .then((json) => json.data);
+  apiClient.get(apiMethod)
+    .then(res => res.data)
+    .catch(error => console.error(error));
+    
+interface ProductsContainerProps extends FlexProps {
+  products: Product[] | null;
+}
 
-const ProductsContainer = ({ products, ...props }: { products: Product[] }) => {
+const ProductsContainer: React.FC<ProductsContainerProps> = ({ products, ...props }) => {
+  const defaultImg = (e: any) => {
+    e.target.src = nextLogo;
+  }
+
   return (
     <Flex {...props}>
-      {products.map((item, index) => {
+      {products?.map((item, index) => {
         return (
           <Banner
             key={index}
+            className="w-96"
             before={
               <Image
                 width={96}
                 height={96}
-                src={item.image}
+                src={item.image || nextLogo}
                 alt="Иконка товара"
+                onError={defaultImg}
               />
             }
-            header={item.name}
+            header={<EllipsisText>{item.name}</EllipsisText>}
             subheader={`${item.price} ₽`}
             actions={
               <Button before={<Icon24AddCircle />} onClick={(e: any) => { console.log(e) }}>
@@ -50,42 +61,39 @@ const ProductsContainer = ({ products, ...props }: { products: Product[] }) => {
   );
 };
 
-export default function Page () {
-  const { data, error, isLoading } = useSWR(
+export default function Index () {
+  const { data, error, isLoading }: { data: APIResponse, error: any, isLoading: boolean } = useSWR(
     "products",
     fetcher
   );
 
+  const { viewWidth } = useAdaptivityConditionalRender();
+  const [activeStory, setActiveStory] = useState('home');
+  const [products, setProducts] = useState<Product[] | null>(null);
+  const [fetching, setFetching] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setFetching(true);
+    fetcher("products").then((res) => {
+      if (!res.success) return;
+      setProducts(res.response);
+      setFetching(false);
+    });
+  }, []);
+
+  const { response }: { response: Product[] } = data || {};
+  useEffect(() => setProducts(response), [response]);
+
   if (isLoading) return "Loading";
   if (error) return <div>Failed to load</div>;
   if (!data) return <div>No data</div>;
-
-  const { response }: { response: Product[] } = data;
 
   const activeStoryStyles = {
     backgroundColor: 'var(--vkui--color_background_secondary)',
     borderRadius: 8,
   };
 
-  const { viewWidth } = useAdaptivityConditionalRender();
-  const [activeStory, setActiveStory] = useState('home');
-
   const onStoryChange = (e: any) => setActiveStory(e.currentTarget.dataset.story);
-
-  const [products, setProducts] = useState(response);
-  const [fetching, setFetching] = useState(false);
-
-  const onRefresh = useCallback(() => {
-    setFetching(true);
-
-    setTimeout(
-      () => {
-        setFetching(false);
-        setProducts(response);
-      },
-      1000
-    );
-  }, []);
 
   return (
     <SplitLayout header={<PanelHeader delimiter="none" />} center>
@@ -124,8 +132,9 @@ export default function Page () {
             </Group>
             <Div className="!pt-0">
               <Flex direction="row" gap="xs" margin="auto" justify="center" align="center">
-                <Footnote caps inline weight="3" className="opacity-70">Спасибо</Footnote>
+                <Footnote inline weight="2" className="opacity-70">With</Footnote>
                 <Icon32LogoVkColor />
+                <Title level="3" inline className="opacity-70">UI</Title>
               </Flex>
             </Div>
           </Panel>
