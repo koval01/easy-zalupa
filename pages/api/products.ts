@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import rateLimit from "@/utils/rate-limit";
 
+export const runtime = 'edge';
+
 type ResponseData = {
   success: boolean;
   response?: []
