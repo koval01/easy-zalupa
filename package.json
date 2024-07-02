@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cloudflare/next-on-pages": "^1.12.0",
     "@vkontakte/icons": "^2.124.0",
     "@vkontakte/vkui": "^6.2.0",
     "axios": "^1.7.2",
