@@ -13,6 +13,7 @@
     "@vkontakte/icons": "^2.124.0",
     "@vkontakte/vkui": "^6.2.0",
     "axios": "^1.7.2",
+    "lru-cache": "^10.3.0",
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
